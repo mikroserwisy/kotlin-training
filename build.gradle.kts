@@ -15,6 +15,8 @@ repositories {
 dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.12.0.202106070339-r")
     testImplementation(kotlin("test"))
+    testImplementation("io.kotest:kotest-runner-junit5:4.6.1")
+    testImplementation("io.kotest:kotest-assertions-core:4.6.1")
 }
 
 tasks.test {
