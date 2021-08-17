@@ -1,4 +1,4 @@
-package examples
+package examples.tictactoe
 
 import java.util.Collections.disjoint
 import java.util.stream.Collectors.toSet

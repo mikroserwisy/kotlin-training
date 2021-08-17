@@ -1,6 +1,5 @@
 package examples
 
-import java.lang.Exception
 import java.util.*
 
 // Napisz program zliczający ilość wystąpień litery w teksli
