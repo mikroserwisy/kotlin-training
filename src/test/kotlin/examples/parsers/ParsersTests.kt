@@ -5,8 +5,12 @@ import io.kotest.matchers.shouldBe
 
 class ParsersTests : StringSpec({
 
-    "should run test" {
-        2 + 5 shouldBe 7
+    "should parse key value pair" {
+        keyValuePair("firstName:jan") shouldBe mapOf("firstName" to "jan")
+    }
+
+    "should parse many key value pairs" {
+        keyValuePair("firstName:jan\nlastName:Nowak") shouldBe mapOf("firstName" to "jan", "lastName" to "Nowak")
     }
 
 })
