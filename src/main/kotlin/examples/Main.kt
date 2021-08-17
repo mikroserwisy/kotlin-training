@@ -1,101 +1,89 @@
-class Person(userName: String) {
+import java.util.*
+import kotlin.properties.Delegates
+import kotlin.reflect.KProperty
 
-    val name = userName
+interface Showable {
 
-    val isEmpty: Boolean
-        get() = name.isEmpty()
+    fun show(text: String)
 
-    var description = ""
-        get() = "Person with name $field"
-        set(value) {
-            field = value.uppercase()
-        }
+}
 
-    private var subscriber = false
+class ConsoleShowable : Showable {
 
-    var isSubscriber: String
-        get() = "Is subscriber: $subscriber"
-        set(value) {
-            subscriber = !subscriber
-        }
+    override fun show(text: String) = println(text)
 
-    lateinit var jobDescription: String
+}
 
-    init {
-        if (::jobDescription.isInitialized) {
-            println(jobDescription)
-        }
-    }
+class StateChangeLogger {
 
-    val subject = "Tester"
+    operator fun getValue(ref: Any?, property: KProperty<*>) = "$ref, property name: ${property.name}"
 
-    companion object {
-
-        fun sayHello() {
-            println("Hello")
-        }
-
+    operator fun setValue(ref: Any?, property: KProperty<*>, value: String) {
+        println("$ref, property name: ${property.name}, value: $value")
     }
 
 }
 
-class Student {
+class Account(var balance: Long, showable: Showable): Showable by showable {
 
-    val subject = "Programming"
+    var description: String by StateChangeLogger()
 
-    fun Person.learn() {
-        println("My score is: $score")
-        println("My subject id: $this@Student.subject")
+    val hash: String by lazy {
+        println("Computing hash")
+        UUID.randomUUID().toString()
     }
 
-    fun show(person: Person) {
-        person.learn()
+    var number: String by Delegates.observable("not assigned") { property, oldValue, newValue ->
+        println("Property \"${property.name}\" was changed from $oldValue to $newValue")
     }
+
+    override fun show(text: String) {
+        println("Account show: $text")
+    }
+
+}
+
+class Person(map: Map<String, Any?>) {
+
+    val firstName: String by map
+    val age: Int by map
 
 }
 
 
 fun main() {
-    val person = Person("Jan")
-    println(person.name)
-    println(person.isEmpty)
-    println(person.description)
-    person.description = "Marek"
-    println(person.description)
-    //person.name = ""
-    person.jobDescription = "Tester"
-    person.showInfo()
-    println(person.score)
-    Person.sayHello()
-    Person.sayGoodbye()
-    val student = Student()
-    student.show(person)
-    val intContainer = Container(1)
-    println(intContainer.value)
-    val stringContainer = Container("Text")
-    println(stringContainer.value)
+    val account = Account(1, ConsoleShowable())
+    val hash = account.hash
+    account.hash
+    account.description = "My account"
+    println(account.description)
+    account.show("Test")
+    account.number = "10"
 
-    convert(2.0)
-    convert("Text")
+    val properties = mapOf("firstName" to "Jan", "age" to 10)
+    val  person = Person(properties)
+    println(person.firstName)
+
+    println("Test" hash '*')
+    val point = -Point(1, 2)
+    val secondPoint = Point(3, 3)
+    println(point)
+    println(point + secondPoint)
+    val (x, _) = point
+    val (_, y) = getPoint()
+    println(x)
 }
 
-fun Person.showInfo() {
-    println("Person info: $name")
+fun getPoint() = Point(1, 2)
+
+infix fun String.hash(char: Char) =  this.map { char }.joinToString("")
+
+data class Point(val x: Int, val y: Int) {
+
+    operator fun plus(point: Point): Point = Point(x + point.x, y + point.y)
+
 }
 
-val Person.score: Int
-    get() = name.length * 10
+operator fun Point.unaryMinus() = Point(-x, -y)
 
-fun Person.Companion.sayGoodbye() = println("Goodbye")
 
-class IntContainer(val value: Int)
-
-class DoubleContainer(val value: Double)
-
-fun convert(value: Int): String = value.toString()
-
-fun convert(value: String): Double = value.toDouble()
-
-class Container<V>(val value: V)
-
-fun <S> convert(value: S) =  value.toString()
