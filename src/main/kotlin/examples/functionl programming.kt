@@ -262,7 +262,10 @@ fun <A, B> mapF(tree: Tree<A>, f: (A) -> B) = fold(tree, { a: A -> Leaf(f(a)) },
 
 // Separation of side effects
 fun fahrenheitToCelsius(value: Double): Double = (value - 32) * 5.0 / 9.0
-fun temperatureToString(temperature: Double) = "Temperatur is equal ${String.format("%.2f", temperature)}°"
+fun toFixed(value: Double) = String.format("%.2f", value)
+val convertTemperature = compose(::toFixed, ::fahrenheitToCelsius) // toFixed(fahrenheitToCelsius(x))
+fun temperatureToString(temperature: String) = "Temperatur is equal ${temperature}°"
+
 // fun write(text: String): Unit = println(text) // not pure
 
 /*
@@ -318,14 +321,12 @@ interface IO<A> {
 // fun read(): String = readLine().orEmpty() // not pure
 fun read(): IO<String> = IO { readLine().orEmpty() }
 fun write(text: String): IO<Unit> = IO { println(text) }
-fun toFixed(value: Double) = String.format("%.2f", value)
-val convertTemperature = compose(::toFixed, ::fahrenheitToCelsius) // toFixed(fahrenheitToCelsius(x))
+
 
 val echo: IO<Unit> = read().flatMap(::write)
 
 fun main() {
-    // write(temperatureToString(fahrenheitToCelsius(70.0)))
-    // write(temperatureToString(fahrenheitToCelsius(70.0))).run()
+    // write(temperatureToString(convertTemperature(70.0))).run()
     // echo.run()
     write("Enter a temperature in degrees Fahrenheit: ")
         .flatMap { read() }
@@ -345,3 +346,4 @@ Założenia:
 Zadanie wykonaj obiektowo lub funkcyjnie
 */
 
+// https://bit.ly/3k74ZxN
