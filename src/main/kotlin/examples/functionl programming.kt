@@ -168,23 +168,178 @@ fun product(xs: List<Double>): Double = when (xs) {
     is Cons -> if (xs.head == 0.0) 0.0 else xs.head * product(xs.tail)
 }
 
-fun main() {
-    println(sum(List.of(1, 2, 3, 4)))
-    println(product(List.of(1.0, 2.0, 3.0, 4.0)))
+fun <A> tail(xs: List<A>) = when (xs) {
+    is Cons -> xs.tail
+    else -> Nil
 }
 
+fun <A> prepend(xs: List<A>, x: A) = when (xs) {
+    is Cons -> Cons(x, xs)
+    else -> Nil
+}
 
+tailrec fun <A> drop(xs: List<A>, n: Int): List<A> =
+    if (n <= 0) xs else when (xs) {
+        is Cons -> drop(xs.tail, n - 1)
+        else -> Nil
+    }
 
+tailrec fun <A> dropWhile(xs: List<A>, predicate: (A) -> Boolean): List<A> = when (xs) {
+    is Cons -> if (predicate(xs.head)) dropWhile(xs.tail, predicate) else xs
+    else -> xs
+}
 
+fun <A> append(xs1: List<A>, xs2: List<A>): List<A> = when (xs1) {
+    is Nil -> xs2
+    is Cons -> Cons(xs1.head, append(xs1.tail, xs2))
+}
 
+fun <A, B> foldRight(xs: List<A>, value: B, f: (A, B) -> B): B = when (xs) {
+    is Nil -> value
+    is Cons -> f(xs.head, foldRight(xs.tail, value, f))
+}
 
+fun sumFr(xs: List<Int>) = foldRight(xs, 0) { a, b -> a + b }
+fun productFr(xs: List<Int>) = foldRight(xs, 1.0) { a, b -> a * b }
+fun lengthFr(xs: List<Int>) = foldRight(xs, 0) { _, len -> 1 + len }
 
+tailrec fun <A, B> foldLeft(xs: List<A>, value: B, f: (B, A) -> B): B = when (xs) {
+    is Nil -> value
+    is Cons -> foldLeft(xs.tail, f(value, xs.head), f)
+}
 
+fun sumFl(xs: List<Int>) = foldLeft(xs, 0) { a, b -> a + b }
+fun productFl(xs: List<Int>) = foldLeft(xs, 1.0) { a, b -> a * b }
+fun lengthFl(xs: List<Int>) = foldLeft(xs, 0) { len, _ -> 1 + len }
 
+fun example9() {
+    val numbers = List.of(1, 2, 3, 4)
+    println(sum(numbers))
+    println(product(List.of(1.0, 2.0, 3.0, 4.0)))
+    println(tail(numbers))
+    println(prepend(numbers, 0))
+    println(drop(numbers, 2))
+    println(dropWhile(numbers) { it < 3 })
+    println(append(numbers, List.of(5, 6, 7)))
+    println(sumFr(numbers))
+    println(productFr(numbers))
+    println(lengthFr(numbers))
+    println(sumFl(numbers))
+    println(productFl(numbers))
+    println(lengthFl(numbers))
+}
 
+// Tree
+sealed class Tree<out A>
+data class Leaf<A>(val value: A) : Tree<A>()
+data class Branch<A>(val left: Tree<A>, val right: Tree<A>) : Tree<A>()
 
+fun <A> numberOfNodes(tree: Tree<A>): Int = when (tree) {
+    is Leaf -> 1
+    is Branch -> 1 + numberOfNodes(tree.left) + numberOfNodes(tree.right)
+}
 
+fun <A> maxDepth(tree: Tree<A>): Int = when (tree) {
+    is Leaf -> 0
+    is Branch -> 1 + maxOf(maxDepth(tree.left), maxDepth(tree.right))
+}
 
+fun <A, B> map(tree: Tree<A>, f: (A) -> B): Tree<B> = when (tree) {
+    is Leaf -> Leaf(f(tree.value))
+    is Branch -> Branch(map(tree.left, f), map(tree.right, f))
+}
 
+fun <A, B> fold(tree: Tree<A>, f: (A) -> B, b: (B, B) -> B): B = when (tree) {
+    is Leaf -> f(tree.value)
+    is Branch -> b(fold(tree.left, f, b), fold(tree.right, f, b))
+}
 
+fun <A> numberOfNodeF(tree: Tree<A>) = fold(tree, { 1 }, { b1, b2 -> 1 + b1 + b2 })
 
+fun <A> maxDepthF(tree: Tree<A>) = fold(tree, { 0 }, { b1, b2 -> 1 + maxOf(b1, b2)})
+
+fun <A, B> mapF(tree: Tree<A>, f: (A) -> B) = fold(tree, { a: A -> Leaf(f(a)) }, { b1: Tree<B>, b2: Tree<B> -> Branch(b1, b2)})
+
+// Separation of side effects
+fun fahrenheitToCelsius(value: Double): Double = (value - 32) * 5.0 / 9.0
+fun temperatureToString(temperature: Double) = "Temperatur is equal ${String.format("%.2f", temperature)}°"
+// fun write(text: String): Unit = println(text)
+
+/*
+fun write(text: String) = object : IO {
+
+    override fun run() = println(text)
+
+}
+
+interface IO {
+
+    fun run()
+
+}
+*/
+
+interface IO<A> {
+
+    fun run(): A
+
+    fun <B> map(f: (A) -> B): IO<B> = object : IO<B> {
+
+        override fun run(): B = f(this@IO.run())
+
+    }
+
+    fun <B> flatMap(f: (A) -> IO<B>): IO<B> = object : IO<B> {
+
+        override fun run(): B = f(this@IO.run()).run()
+
+    }
+
+    infix fun <B> combine(io: IO<B>): IO<Pair<A, B>> = object : IO<Pair<A, B>> {
+
+        override fun run(): Pair<A, B> = this@IO.run() to io.run()
+
+    }
+
+    companion object {
+
+        fun <A> unit(a: () -> A) = object : IO<A> {
+
+            override fun run(): A = a()
+
+        }
+
+        operator fun <A> invoke(a: () -> A) = unit(a)
+
+    }
+
+}
+
+// fun read(): String = readLine().orEmpty()
+fun read(): IO<String> = IO { readLine().orEmpty() }
+fun write(text: String): IO<Unit> = IO { println(text) }
+fun toFixed(value: Double) = String.format("%.2f", value)
+val temperature = compose(::toFixed, ::fahrenheitToCelsius) // temperatureToString(fahrenheitToCelsius(x))
+fun calculateTemperature(): IO<Unit> = write("Enter a temperature in degrees Fahrenheit: ")
+    .flatMap { read().map { it.toDouble() } }
+    .map { temperature(it) }
+    .flatMap { write("Degrees Celsius: $it°") }
+
+val echo: IO<Unit> = read().flatMap(::write)
+
+fun main() {
+    // write(temperatureToString(fahrenheitToCelsius(70.0)))
+    // write(temperatureToString(fahrenheitToCelsius(70.0))).run()
+    // echo.run()
+    calculateTemperature().run()
+}
+
+/*
+Napisz kalkulator podatkowy, który pozwoli na określenie całkowitej kwoty podatku do zapłacenia.
+Założenia:
+-podatków może być kilka - trzeba je wszystkie uwzględnić
+-sposób naliczania podatku może się w przyszłości zmienić (zmiana zasad, nowe podatki)
+-występują ulgi/odpisy od podatku
+
+Zadanie wykonaj obiektowo lub funkcyjnie
+*/
