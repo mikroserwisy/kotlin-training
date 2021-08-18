@@ -130,9 +130,47 @@ fun safeDiv(x: Int, y: Int): Either<String, Int> =
         Left(e.message ?: "error")
     }
 
-fun main() {
+fun example7() {
     println(safeDiv(6, 2))
     println(safeDiv(6, 0))
+}
+
+// List
+
+sealed class List<out A> {
+
+    companion object {
+
+        fun <A> of(vararg xs: A): List<A> {
+            val tail = xs.sliceArray(1 until xs.size)
+            return if (xs.isEmpty()) Nil else Cons(xs[0], of(*tail))
+        }
+
+    }
+
+}
+object Nil : List<Nothing>()
+data class Cons<out A>(val head: A, val tail: List<A>) : List<A>()
+
+fun example8() {
+    val emptyList = Nil
+    val listOfStrings = Cons("java", Cons("Kotlin", Nil))
+    val numbers = List.of(1, 2, 3, 4)
+}
+
+fun sum(xs: List<Int>): Int = when (xs) {
+    is Nil -> 0
+    is Cons -> xs.head + sum(xs.tail)
+}
+
+fun product(xs: List<Double>): Double = when (xs) {
+    is Nil -> 1.0
+    is Cons -> if (xs.head == 0.0) 0.0 else xs.head * product(xs.tail)
+}
+
+fun main() {
+    println(sum(List.of(1, 2, 3, 4)))
+    println(product(List.of(1.0, 2.0, 3.0, 4.0)))
 }
 
 
