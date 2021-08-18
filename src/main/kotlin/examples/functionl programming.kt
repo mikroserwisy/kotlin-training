@@ -263,7 +263,7 @@ fun <A, B> mapF(tree: Tree<A>, f: (A) -> B) = fold(tree, { a: A -> Leaf(f(a)) },
 // Separation of side effects
 fun fahrenheitToCelsius(value: Double): Double = (value - 32) * 5.0 / 9.0
 fun temperatureToString(temperature: Double) = "Temperatur is equal ${String.format("%.2f", temperature)}°"
-// fun write(text: String): Unit = println(text)
+// fun write(text: String): Unit = println(text) // not pure
 
 /*
 fun write(text: String) = object : IO {
@@ -315,7 +315,7 @@ interface IO<A> {
 
 }
 
-// fun read(): String = readLine().orEmpty()
+// fun read(): String = readLine().orEmpty() // not pure
 fun read(): IO<String> = IO { readLine().orEmpty() }
 fun write(text: String): IO<Unit> = IO { println(text) }
 fun toFixed(value: Double) = String.format("%.2f", value)
