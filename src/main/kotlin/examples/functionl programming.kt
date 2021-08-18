@@ -320,10 +320,6 @@ fun read(): IO<String> = IO { readLine().orEmpty() }
 fun write(text: String): IO<Unit> = IO { println(text) }
 fun toFixed(value: Double) = String.format("%.2f", value)
 val temperature = compose(::toFixed, ::fahrenheitToCelsius) // temperatureToString(fahrenheitToCelsius(x))
-fun calculateTemperature(): IO<Unit> = write("Enter a temperature in degrees Fahrenheit: ")
-    .flatMap { read().map { it.toDouble() } }
-    .map { temperature(it) }
-    .flatMap { write("Degrees Celsius: $it°") }
 
 val echo: IO<Unit> = read().flatMap(::write)
 
@@ -331,7 +327,11 @@ fun main() {
     // write(temperatureToString(fahrenheitToCelsius(70.0)))
     // write(temperatureToString(fahrenheitToCelsius(70.0))).run()
     // echo.run()
-    calculateTemperature().run()
+    write("Enter a temperature in degrees Fahrenheit: ")
+        .flatMap { read().map { it.toDouble() } }
+        .map { temperature(it) }
+        .flatMap { write("Degrees Celsius: $it°") }
+        .run()
 }
 
 /*
