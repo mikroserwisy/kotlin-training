@@ -103,3 +103,48 @@ fun <T, U> Parser<T>.map(f: (T) -> U): Parser<U> = { this(it).map(f) }
 fun <X, T> Parser<X>.before(p: Parser<T>): Parser<T> = sequence(this, p).map { it.second }
 
 fun <T, Y> Parser<T>.followedBy(y: Parser<Y>): Parser<T> = sequence(this, y).map { it.first  }
+
+fun <T> Parser<T>.many(): Parser<List<T>> = { input ->
+    when (val result = this(input)) {
+        is Failure -> Success(emptyList(), input)
+        is Success -> many()(result.remainder).map { listOf(result.match) + it }
+    }
+}
+
+fun <T, X> Parser<T>.separatedBy(separatorParser: Parser<X>): Parser<List<T>> = { input ->
+    fun parse(tail: String): Result<List<T>> = when (val separatorResult = separatorParser(tail)) {
+        is Failure -> Success(emptyList(), tail)
+        is Success -> when (val result = this(separatorResult.remainder)) {
+            is Failure -> result
+            is Success -> parse(result.remainder).map { listOf(result.match) + it }
+        }
+    }
+    when (val result = this(input)) {
+        is Failure -> Success(emptyList(), input)
+        is Success -> parse(result.remainder).map { listOf(result.match) + it }
+    }
+}
+
+fun prefixWhile(predicate: (Char) -> Boolean): Parser<String> = { input ->
+    val match = input.takeWhile(predicate)
+    if (match.isNotEmpty()) {
+        Success(match, input.substring(match.length))
+    } else {
+        Failure("prefix" ,input)
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

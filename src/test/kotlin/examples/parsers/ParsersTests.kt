@@ -77,6 +77,34 @@ class ParsersTests : StringSpec({
         parser("a1") shouldBe Success("a", "")
     }
 
+    "should parse many" {
+        val parser = prefix("a").many()
+        parser("aaa") shouldBe Success(listOf("a", "a", "a"), "")
+    }
+
+    "should parse many with separartor" {
+        val parser = ::integer.separatedBy(prefix(","))
+        parser("1,2") shouldBe Success(listOf(1, 2), "")
+        parser("1,a") shouldBe Failure("integer", "a")
+        parser("a") shouldBe Success(emptyList(), "a")
+    }
+
+    "should parse expression with array of ints" {
+        val text = "let ab = [1, 2, 3,  4]"
+
+        val let = prefix("let").then(::whitespace.many())
+        val variableName = prefixWhile { it.isLetter() }.followedBy(::whitespace.many())
+        val assigment = prefix("=").followedBy(::whitespace.many())
+        val values = ::integer.separatedBy(sequence(prefix(","), ::whitespace.many()))
+        val array = prefix("[").before(values).followedBy(prefix("]"))
+        val parser = let.before(variableName).followedBy(assigment).then(array)
+        when (val result = parser(text)) {
+            is Success -> println(result.match.second)
+            is Failure -> println(result.expected)
+        }
+    }
+
+
 })
 
 
