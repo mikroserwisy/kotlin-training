@@ -319,7 +319,7 @@ interface IO<A> {
 fun read(): IO<String> = IO { readLine().orEmpty() }
 fun write(text: String): IO<Unit> = IO { println(text) }
 fun toFixed(value: Double) = String.format("%.2f", value)
-val convertTemperature = compose(::toFixed, ::fahrenheitToCelsius) // temperatureToString(fahrenheitToCelsius(x))
+val convertTemperature = compose(::toFixed, ::fahrenheitToCelsius) // toFixed(fahrenheitToCelsius(x))
 
 val echo: IO<Unit> = read().flatMap(::write)
 
@@ -344,3 +344,4 @@ Założenia:
 
 Zadanie wykonaj obiektowo lub funkcyjnie
 */
+
