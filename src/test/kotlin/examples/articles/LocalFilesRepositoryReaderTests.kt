@@ -1,8 +1,8 @@
 package examples.articles
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class LocalFilesRepositoryReaderTests {
 
@@ -15,7 +15,7 @@ class LocalFilesRepositoryReaderTests {
 
     @Test
     fun `given files does not exist when get metadata with predicate then returns empty list`() {
-        assertEquals(emptyList(), sut.getMetadata { it.name == "intro.md" })
+        assertEquals(emptyList<FileMetadata>(), sut.getMetadata { it.name == "intro.md" })
     }
 
     @Test
