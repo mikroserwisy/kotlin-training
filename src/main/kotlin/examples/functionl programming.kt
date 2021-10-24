@@ -78,12 +78,12 @@ fun <A, B> Option<A>.map(f: (A) -> B) = when (this) {
     is Some -> Some(f(value))
 }
 
-fun <A, B> Option<A>.flatMap(f: (A) -> Option<B>): Option<B> = map(f).getOrElse { None }
-
 fun <A> Option<A>.getOrElse(default: () -> A): A = when (this) {
     is None -> default()
     is Some -> value
 }
+
+fun <A, B> Option<A>.flatMap(f: (A) -> Option<B>): Option<B> = map(f).getOrElse { None }
 
 fun <A> Option<A>.orElse(ob: () -> Option<A>): Option<A> = map { Some(it) }.getOrElse { ob() }
 
