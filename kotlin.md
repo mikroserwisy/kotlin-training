@@ -13,6 +13,9 @@ fun main(args: Array<String>) {
 }
 ```
 
+## Konwencje kodowania
+[https://kotlinlang.org/docs/coding-conventions.html](https://kotlinlang.org/docs/coding-conventions.html)
+
 ## Zmienne
 Zmienne tylko do odczytu deklarowane są z użyciem słowa kluczowego ```val```. Zmienne, których stan może się zmienić
 deklarowane są z wykorzystaniem ```var```

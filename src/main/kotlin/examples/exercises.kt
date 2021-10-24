@@ -2,7 +2,7 @@ package examples
 
 import java.util.*
 
-// Napisz program zliczający ilość wystąpień litery w teksli
+// Napisz program zliczający ilość wystąpień litery w tekście
 fun ex1() {
     val letter = 'a'
     val text = "Ala ma kota"
@@ -20,6 +20,7 @@ fun ex1() {
 }
 
 // Napisz program weryfikujący czy dany rok jest przestępny
+// https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
 fun ex2() {
     val year = 2010
     val isLeap = when {
@@ -29,7 +30,7 @@ fun ex2() {
     println("Result: $isLeap")
 }
 
-// Napisz program sprawdzający, czy dany znak to litera (duża / mala ASCII) z wykorzystaniem instrukcji warunkowych i range
+// Napisz program sprawdzający, czy dany znak to litera (duża lub mala ASCII) z wykorzystaniem instrukcji warunkowych i range
 fun ex3() {
     val char = 'a'
     if (char in 'a'..'z' || char in 'A'..'Z') {
